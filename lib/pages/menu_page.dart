@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:product_catalog/components/product_list.dart';
 import 'package:product_catalog/models/product.dart';
+import 'package:product_catalog/pages/product_details_page.dart';
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key});
@@ -10,7 +11,20 @@ class MenuPage extends StatefulWidget {
 }
 
 class _MenuPageState extends State<MenuPage> {
+
   final List<Product> productItem = Product.tempProduct;
+
+  void navigateProductDetails(int index) {
+    Navigator.push(
+      context, 
+      MaterialPageRoute(
+        builder: (context) => ProductDetailsPage(
+          products: productItem[index],
+        )
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -53,7 +67,7 @@ class _MenuPageState extends State<MenuPage> {
 
           // Text
           Padding(
-            padding: EdgeInsetsGeometry.only(top: 15, bottom: 5, left: 20),
+            padding: EdgeInsets.only(top: 15, bottom: 5, left: 20),
             child: Text(
               "List of Products",
               style: TextStyle(
@@ -70,6 +84,7 @@ class _MenuPageState extends State<MenuPage> {
                 itemCount: productItem.length,
                 itemBuilder: (context, index) => ProductList(
                   products: productItem[index],
+                  onTap: () => navigateProductDetails(index),
                 ),
               ),
           ),
