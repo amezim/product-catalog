@@ -1,4 +1,4 @@
-import 'package:clothing_shop/pages/menu_page.dart';
+import 'package:product_catalog/pages/menu_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {

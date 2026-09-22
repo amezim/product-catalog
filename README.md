@@ -9,6 +9,7 @@ An application for Neurogine technical assessment.
 - [ ] Add `TextField` and `SearchBar` for filtering products
 - [ ] Create UI template for the product listing
 - [ ] Add `ListView` to display the product list before implementing using API
+- [ ] Improve the UI by changing text fonts, background colours and add extra icons 
 
 ## Completed Tasks
 - [x] Setting up Git configuration
