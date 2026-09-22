@@ -5,11 +5,12 @@ An application for Neurogine technical assessment.
 ## To-Do Tasks
 
 ### User Interface
-- [ ] Initialize basic screen layout including `Scaffold`, `AppBar` and `Title`
-- [ ] Add `TextField` and `SearchBar` for filtering products
-- [ ] Create UI template for the product listing
-- [ ] Add `ListView` to display the product list before implementing using API
+- [ ] Create a product screen detailing full descriptions of the product
 - [ ] Improve the UI by changing text fonts, background colours and add extra icons 
 
 ## Completed Tasks
 - [x] Setting up Git configuration
+- [x] Initialize basic screen layout including `Scaffold`, `AppBar` and `Title`
+- [x] Add `TextField` and `SearchBar` for filtering products
+- [x] Create UI template for the product listing
+- [x] Add `ListView` to display the product list before implementing using API

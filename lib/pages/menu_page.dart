@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:product_catalog/components/product_list.dart';
+import 'package:product_catalog/models/product.dart';
 
 class MenuPage extends StatefulWidget {
-  const new({super.key});
+  const MenuPage({super.key});
 
   @override
   State<MenuPage> createState() => _MenuPageState();
 }
 
 class _MenuPageState extends State<MenuPage> {
+  final List<Product> productItem = Product.tempProduct;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,6 +37,12 @@ class _MenuPageState extends State<MenuPage> {
               decoration: InputDecoration(
                 filled: true,
                 fillColor: const Color.fromARGB(255, 220, 220, 220),
+                hintText: 'Search',
+                hintStyle: TextStyle(
+                  color: const Color.fromARGB(255, 155, 155, 155),
+                  fontSize: 15,
+                  // fontWeight: FontWeight.bold,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(20),
                   borderSide: BorderSide.none,
@@ -44,7 +53,7 @@ class _MenuPageState extends State<MenuPage> {
 
           // Text
           Padding(
-            padding: EdgeInsetsDirectional.all(20),
+            padding: EdgeInsetsGeometry.only(top: 15, bottom: 5, left: 20),
             child: Text(
               "List of Products",
               style: TextStyle(
@@ -52,9 +61,18 @@ class _MenuPageState extends State<MenuPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-          )
+          ),
 
           // Product List
+          Expanded(
+            child: 
+              ListView.builder (
+                itemCount: productItem.length,
+                itemBuilder: (context, index) => ProductList(
+                  products: productItem[index],
+                ),
+              ),
+          ),
 
         ],
       ),
