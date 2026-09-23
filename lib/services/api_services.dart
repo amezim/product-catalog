@@ -8,9 +8,9 @@ class APIServices {
   final baseURL = Uri.parse('https://dummyjson.com/products/');  
 
   // function to GET products
-  Future<List<Product>> fetchProducts(int page, int pageSize) async {
-    final response = await http.get(Uri.parse('https://dummyjson.com/products?limit=20&skip=0'));
-    final skip = (page - 1) * pageSize;
+  Future<List<Product>> fetchProducts({int limit = 10, int skip = 0}) async {
+    final response = await http.get(Uri.parse('https://dummyjson.com/products?limit=$limit&skip=$skip'));
+    // final skip = (page - 1) * pageSize;
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final List productData = data['products'] ?? [];
@@ -20,6 +20,7 @@ class APIServices {
     }
   }
 
+  // function to Search products
   Future<List<Product>> searchProducts(String query) async {
     final response = await http.get(Uri.parse('https://dummyjson.com/products/search?q=$query'));
     if (response.statusCode == 200) {

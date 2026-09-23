@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:http/http.dart';
 import 'package:product_catalog/components/product_list.dart';
 import 'package:product_catalog/models/product.dart';
 import 'package:product_catalog/pages/product_details_page.dart';
@@ -14,21 +17,91 @@ class MenuPage extends StatefulWidget {
 
 class _MenuPageState extends State<MenuPage> {
 
-  // final List<Product> productItem = Product.tempProduct;
-  late Future<List<Product>?> productFuture;
+  final ScrollController scrollController = ScrollController();
+
+  List<Product> loadProducts = [];
+  bool isLoading = false;
+  bool isSearching = false;
+  bool hasMore = true;
+  int itemSkip = 0;
+  int itemLimit = 10;
 
   // Fetch data for products list
   @override
   void initState() {
     super.initState();
-    productFuture = APIServices().fetchProducts(1, 20);
+    loadItems();
+    scrollController.addListener(() {
+      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 200 && !isLoading && hasMore && !isSearching) {
+        loadItems();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  Future<void> loadItems() async {
+    if (isLoading || !hasMore)
+      return;
+
+    setState(() => isLoading = true);
+
+    try {
+      final nextProducts = await APIServices().fetchProducts(
+        limit: itemLimit,
+        skip: itemSkip,
+      );
+
+      setState(() {
+        itemSkip += itemLimit;
+        isLoading = false;
+
+        if (nextProducts.length < itemLimit) {
+          hasMore = false; 
+        }
+
+        loadProducts.addAll(nextProducts);
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      print('Error loading items: $e');
+    }
   }
 
   // Handle search input
-  void searchInput(String query) {
+  Future<void> searchInput(String query) async {
+    final trimmed = query.trim();
+
+    if (trimmed.isEmpty) {
+      setState(() {
+        isSearching = false;
+        loadProducts.clear();
+        itemSkip = 0;
+        hasMore = true;
+      });
+      loadItems();
+      return;
+    }
+
     setState(() {
-      productFuture = APIServices().searchProducts(query);
+      isSearching = true;
+      isLoading = true;
     });
+
+    try {
+      final searchResults = await APIServices().searchProducts(trimmed);
+      setState(() {
+        loadProducts = searchResults;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      print('Search error: $e');
+    }
   }
 
   // Navigate screen to product details page
@@ -98,52 +171,36 @@ class _MenuPageState extends State<MenuPage> {
 
           // Product List + Future Builder
           Expanded(
-            child: FutureBuilder<List<Product>?>(
-              future: productFuture,
-              builder: (context, snapshot) {
-                // Waiting
-                if (snapshot.connectionState == ConnectionState.waiting) {
+            child: Builder(
+              builder: (context) {
+                if (loadProducts.isEmpty && isLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
-
-                // Error
-                if (snapshot.hasError) {
-                  return Center(
-                    child: Text('Error loading products: ${snapshot.error}'),
-                  );
+                if (loadProducts.isEmpty) {
+                  return const Center(child: Text("No Products Found"));
                 }
-
-                // Success
-                if (snapshot.hasData && snapshot.data != null && snapshot.data!.isNotEmpty) {
-                  final products = snapshot.data!;
-                  return ListView.builder(
-                    itemCount: products.length,
-                    itemBuilder: (context, index) {
-                      final item = products[index];
-                      return ProductList(
-                        products: item,
-                        onTap: () => navigateProductDetails(item),
+                return ListView.builder(
+                  controller: scrollController,
+                  itemCount: loadProducts.length + (hasMore && !isSearching ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (index == loadProducts.length) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16.0),
+                        child: Center(child: CircularProgressIndicator()),
                       );
-                    },
-                  );
-                }
-                return const Center(child: Text("No products found"));
-              }
-            ),
-          )
+                    }
 
-          /*
-          Expanded(
-            child: 
-              ListView.builder (
-                itemCount: productItem.length,
-                itemBuilder: (context, index) => ProductList(
-                  products: productItem[index],
-                  onTap: () => navigateProductDetails(index),
-                ),
-              ),
+                    final item = loadProducts[index];
+
+                    return ProductList(
+                      products: item,
+                      onTap: () => navigateProductDetails(item),
+                    );
+                  }
+                );
+              },
+            ),
           ),
-          */
 
         ],
       ),
