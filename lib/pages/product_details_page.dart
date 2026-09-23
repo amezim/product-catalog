@@ -30,7 +30,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
         centerTitle: true,
       ),
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Images
           Container(
@@ -50,8 +50,9 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.network(
-                widget.products.image ?? '',
-                fit: BoxFit.fitWidth,
+                widget.products.thumbnail ?? '',
+                width: 300,
+                height: 300,
               ),
             ),
           ),

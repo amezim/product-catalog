@@ -33,7 +33,7 @@ class ProductList extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadiusGeometry.circular(15),
                 child: Image.network(
-                  products.image ?? '',
+                  products.thumbnail ?? '',
                   width: 100,
                   height: 100,
                 ),

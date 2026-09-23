@@ -10,7 +10,7 @@ class Product {
     double rating;
     int stock;
     String? brand;
-    String? image;
+    String? thumbnail;
 
     Product({
       required this.id,
@@ -21,9 +21,24 @@ class Product {
       required this.rating,
       required this.stock,
       this.brand,
-      this.image,
+      this.thumbnail,
     });
 
+    factory Product.fromJson(Map<String, dynamic> json) {
+      return Product(
+        id: json['id'] ?? 0, 
+        name: json['title'] ?? '', 
+        description: json['description'] ?? '', 
+        category: json['category'] ?? '', 
+        price: (json['price'] as num)?.toDouble() ?? 0.0, 
+        rating: (json['rating'] as num)?.toDouble() ?? 0.0, 
+        stock: json['stock'] ?? 0,
+        brand: json['brand'] ?? '',
+        thumbnail: json['thumbnail'] ?? '',
+      );
+    }
+
+    /*
     // Temporary before implementing DummyJSON
     static List<Product> tempProduct = [
       Product(
@@ -47,5 +62,6 @@ class Product {
         image: "https://cdn.dummyjson.com/product-images/beauty/eyeshadow-palette-with-mirror/1.webp",
       ),
     ];
+    */
 
 }
