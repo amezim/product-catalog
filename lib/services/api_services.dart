@@ -8,9 +8,12 @@ class APIServices {
   final baseURL = Uri.parse('https://dummyjson.com/products/');  
 
   // function to GET products
-  Future<List<Product>> fetchProducts({int limit = 10, int skip = 0}) async {
-    final response = await http.get(Uri.parse('https://dummyjson.com/products?limit=$limit&skip=$skip'));
-    // final skip = (page - 1) * pageSize;
+  Future<List<Product>> fetchProducts({required int limit, required int skip, String? sortBy, String? sortOrder}) async {
+    String url = 'https://dummyjson.com/products?limit=$limit&skip=$skip';
+    if (sortBy != null && sortOrder != null) {
+      url += '&sortBy=$sortBy&order=$sortOrder';
+    } 
+    final response = await http.get(Uri.parse(url));
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final List productData = data['products'] ?? [];

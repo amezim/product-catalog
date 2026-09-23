@@ -57,8 +57,19 @@ class ProductList extends StatelessWidget {
       
                   SizedBox(height: 2),
 
-                  Text(
-                    'RM' + products.price.toString(),
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'RM' + products.price.toString(),
+                        ),
+                        Text(
+                          products.category,
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

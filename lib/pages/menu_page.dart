@@ -20,8 +20,11 @@ class _MenuPageState extends State<MenuPage> {
   final ScrollController scrollController = ScrollController();
 
   List<Product> loadProducts = [];
+
+  String selectedSort = 'default';
   bool isLoading = false;
   bool isSearching = false;
+  bool isFilterActive = false;
   bool hasMore = true;
   int itemSkip = 0;
   int itemLimit = 10;
@@ -51,9 +54,22 @@ class _MenuPageState extends State<MenuPage> {
     setState(() => isLoading = true);
 
     try {
+      String? sort;
+      String? order;
+
+      if (selectedSort == 'title') {
+        sort = 'title';
+        order = 'asc';
+      } else if (selectedSort == 'price') {
+        sort = 'price';
+        order = 'asc';
+      }
+
       final nextProducts = await APIServices().fetchProducts(
         limit: itemLimit,
         skip: itemSkip,
+        sortBy: sort,
+        sortOrder: order,
       );
 
       setState(() {
@@ -70,6 +86,19 @@ class _MenuPageState extends State<MenuPage> {
       setState(() => isLoading = false);
       print('Error loading items: $e');
     }
+  }
+
+  void sortChanged(String? newSort) {
+    if (newSort == null || newSort == selectedSort) return;
+
+    setState(() {
+      selectedSort = newSort;
+      loadProducts.clear(); 
+      itemSkip = 0;         
+      hasMore = true;
+    });
+
+    loadItems();
   }
 
   // Handle search input
@@ -116,6 +145,7 @@ class _MenuPageState extends State<MenuPage> {
     );
   }
 
+  // User Interface
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,7 +167,7 @@ class _MenuPageState extends State<MenuPage> {
         children: [
           // Search Field
           Container(
-            margin: EdgeInsets.only(top: 30, right: 20, left: 20),
+            margin: EdgeInsets.only(top: 15, bottom: 5, right: 15, left: 15),
             child: TextField(
               onChanged: searchInput,
               decoration: InputDecoration(
@@ -157,9 +187,45 @@ class _MenuPageState extends State<MenuPage> {
             ),
           ),
 
+          // Dropdown for Sorting
+          Padding(
+            padding: EdgeInsetsGeometry.only(top: 5, bottom: 5, left: 15, right: 15),
+            child: Container(
+              margin: EdgeInsets.only(top: 5, bottom: 5),
+              padding: EdgeInsets.only(left: 15, right: 15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                color: Colors.amber,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Sort By:',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              
+                  DropdownButton<String>(
+                    value: selectedSort,
+                    underline: const SizedBox(),
+                    items: [
+                      DropdownMenuItem(value: 'default', child: Text('Default')),
+                      DropdownMenuItem(value: 'title', child: Text('Title')),
+                      DropdownMenuItem(value: 'price', child: Text('Price')),
+                    ],
+                    onChanged: sortChanged,
+                  )
+                ],
+              ),
+            ),
+          ),
+
           // Header Text
           Padding(
-            padding: EdgeInsets.only(top: 15, bottom: 5, left: 20),
+            padding: EdgeInsets.only(bottom: 5, left: 20),
             child: Text(
               "List of Products",
               style: TextStyle(
@@ -201,7 +267,6 @@ class _MenuPageState extends State<MenuPage> {
               },
             ),
           ),
-
         ],
       ),
     );
