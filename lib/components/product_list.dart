@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:product_catalog/models/product.dart';
 
@@ -36,6 +37,12 @@ class ProductList extends StatelessWidget {
                   products.thumbnail ?? '',
                   width: 100,
                   height: 100,
+                  errorBuilder: (context, error, StackTrace) => 
+                  const SizedBox(
+                    width: 100, 
+                    height: 100, 
+                    child: Icon(Icons.broken_image),
+                  ),
                 ),
               ),
             ),
@@ -44,34 +51,59 @@ class ProductList extends StatelessWidget {
       
             // Name and Price
             Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    products.name,
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-      
-                  SizedBox(height: 2),
-
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: Row(
+              child: SizedBox(
+                height: 90,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const SizedBox(height: 5),
                         Text(
-                          'RM' + products.price.toString(),
+                          products.name,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
                           products.category,
                         ),
                       ],
                     ),
-                  ),
-                ],
+
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.bottomLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 5),
+                          child: Text(
+                            'RM' + products.price.toString(),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    /*
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'RM' + products.price.toString(),
+                          ),
+                          Text(
+                            products.category,
+                          ),
+                        ],
+                      ),
+                    ),
+                    */
+                  ],
+                ),
               ),
             ),
           ],

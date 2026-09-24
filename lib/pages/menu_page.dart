@@ -18,6 +18,7 @@ class MenuPage extends StatefulWidget {
 class _MenuPageState extends State<MenuPage> {
 
   final ScrollController scrollController = ScrollController();
+  final TextEditingController searchController = TextEditingController();
 
   List<Product> loadProducts = [];
 
@@ -44,15 +45,17 @@ class _MenuPageState extends State<MenuPage> {
   @override
   void dispose() {
     scrollController.dispose();
+    searchController.dispose();
     super.dispose();
   }
 
+  // Display items at the start
   Future<void> loadItems() async {
-    if (isLoading || !hasMore)
+    if (isLoading || !hasMore || isSearching)
       return;
 
     setState(() => isLoading = true);
-
+    
     try {
       String? sort;
       String? order;
@@ -88,6 +91,19 @@ class _MenuPageState extends State<MenuPage> {
     }
   }
 
+  // Display items after refresh
+  Future<void> refreshItem() async {
+    searchController.clear();
+    setState(() {
+      loadProducts.clear(); 
+      itemSkip = 0;         
+      hasMore = true;
+      isSearching = false;
+    });
+
+    await loadItems();
+  }
+
   void sortChanged(String? newSort) {
     if (newSort == null || newSort == selectedSort) return;
 
@@ -119,6 +135,7 @@ class _MenuPageState extends State<MenuPage> {
     setState(() {
       isSearching = true;
       isLoading = true;
+      hasMore = false;
     });
 
     try {
@@ -169,6 +186,7 @@ class _MenuPageState extends State<MenuPage> {
           Container(
             margin: EdgeInsets.only(top: 15, bottom: 5, right: 15, left: 15),
             child: TextField(
+              controller: searchController,
               onChanged: searchInput,
               decoration: InputDecoration(
                 filled: true,
@@ -245,24 +263,31 @@ class _MenuPageState extends State<MenuPage> {
                 if (loadProducts.isEmpty) {
                   return const Center(child: Text("No Products Found"));
                 }
-                return ListView.builder(
-                  controller: scrollController,
-                  itemCount: loadProducts.length + (hasMore && !isSearching ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index == loadProducts.length) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 16.0),
-                        child: Center(child: CircularProgressIndicator()),
+
+                return RefreshIndicator(
+                  onRefresh: () async {
+                    await refreshItem();
+                  },
+                  child: ListView.builder(
+                    controller: scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    itemCount: loadProducts.length + (hasMore && !isSearching ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == loadProducts.length) {
+                        return const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+                  
+                      final item = loadProducts[index];
+                  
+                      return ProductList(
+                        products: item,
+                        onTap: () => navigateProductDetails(item),
                       );
                     }
-
-                    final item = loadProducts[index];
-
-                    return ProductList(
-                      products: item,
-                      onTap: () => navigateProductDetails(item),
-                    );
-                  }
+                  ),
                 );
               },
             ),

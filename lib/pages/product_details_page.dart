@@ -72,6 +72,20 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   ),
                 ),
 
+                Text(
+                  widget.products.brand ?? '[No Brands Available]',
+                  style: TextStyle(
+                    fontSize: 15,
+                  ),
+                ),
+
+                SizedBox(height: 5),
+
+                Divider(
+                  height: 15,
+                  thickness: 2,
+                ),
+
                 Container(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -87,16 +101,16 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                       Row(
                         children: [
                           Icon(
-                        Icons.star,
-                        color: Colors.yellow,
-                      ),
-                      Text(
-                        widget.products.rating.toString(),
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                            Icons.star,
+                            color: Colors.yellow,
+                          ),
+                          Text(
+                            widget.products.rating.toString(),
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ],
                       ),
                     ],
@@ -109,9 +123,19 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                   widget.products.description,
                   style: TextStyle(
                     fontSize: 15,
-                    // fontWeight: FontWeight.bold,
                   ),
                 ),
+
+                SizedBox(height: 15),
+
+                Text(
+                  'Stocks Available: ' + widget.products.stock.toString(),
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
               ],
             ),
           ),
