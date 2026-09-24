@@ -20,7 +20,7 @@ class ProductList extends StatelessWidget {
         padding: EdgeInsets.all(3),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
-          color: const Color.fromARGB(255, 215, 215, 215),
+          color: const Color.fromARGB(255, 247, 207, 240),
         ),
         child: Row(
           children: [
@@ -29,7 +29,7 @@ class ProductList extends StatelessWidget {
               margin: EdgeInsets.all(5),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.white,
+                color: const Color.fromARGB(255, 252, 244, 251),
               ),
               child: ClipRRect(
                 borderRadius: BorderRadiusGeometry.circular(15),
@@ -64,12 +64,17 @@ class ProductList extends StatelessWidget {
                         Text(
                           products.name,
                           style: TextStyle(
+                            color: const Color.fromARGB(255, 60, 15, 60),
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           products.category,
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 60, 15, 60),
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -80,6 +85,9 @@ class ProductList extends StatelessWidget {
                           padding: const EdgeInsets.only(bottom: 5),
                           child: Text(
                             'RM' + products.price.toString(),
+                            style: TextStyle(
+                            color: const Color.fromARGB(255, 60, 15, 60),
+                          ),
                           ),
                         ),
                       ),

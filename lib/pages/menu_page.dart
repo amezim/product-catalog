@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart';
@@ -8,6 +7,7 @@ import 'package:product_catalog/models/product.dart';
 import 'package:product_catalog/pages/product_details_page.dart';
 import 'package:product_catalog/services/api_services.dart';
 import 'package:product_catalog/services/debouncer.dart';
+import 'package:product_catalog/controller/menu_controller.dart';
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key});
@@ -18,28 +18,19 @@ class MenuPage extends StatefulWidget {
 
 class _MenuPageState extends State<MenuPage> {
 
+  final ProductMenuController menuController = ProductMenuController();
   final ScrollController scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
-  final Debouncer debouncer = Debouncer(delay: Duration(milliseconds: 500));
-
-  List<Product> loadProducts = [];
-
-  String selectedSort = 'default';
-  bool isLoading = false;
-  bool isSearching = false;
-  bool isFilterActive = false;
-  bool hasMore = true;
-  int itemSkip = 0;
-  int itemLimit = 10;
 
   // Fetch data for products list
   @override
   void initState() {
     super.initState();
-    loadItems();
+    menuController.loadItems();
     scrollController.addListener(() {
-      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 200 && !isLoading && hasMore && !isSearching) {
-        loadItems();
+      if (scrollController.position.pixels >= scrollController.position.maxScrollExtent - 200 && 
+        !menuController.isLoading && menuController.hasMore && !menuController.isSearching) {
+        menuController.loadItems();
       }
     });
   }
@@ -47,113 +38,10 @@ class _MenuPageState extends State<MenuPage> {
   // Free up memory when an object is destroyed
   @override
   void dispose() {
-    debouncer.cancel();
+    menuController.dispose();
     scrollController.dispose();
     searchController.dispose();
     super.dispose();
-  }
-
-  // Display items at the start
-  Future<void> loadItems() async {
-    if (isLoading || !hasMore || isSearching)
-      return;
-
-    setState(() => isLoading = true);
-    
-    try {
-      String? sort;
-      String? order;
-
-      if (selectedSort == 'title') {
-        sort = 'title';
-        order = 'asc';
-      } else if (selectedSort == 'price') {
-        sort = 'price';
-        order = 'asc';
-      }
-
-      final nextProducts = await APIServices().fetchProducts(
-        limit: itemLimit,
-        skip: itemSkip,
-        sortBy: sort,
-        sortOrder: order,
-      );
-
-      setState(() {
-        itemSkip += itemLimit;
-        isLoading = false;
-
-        if (nextProducts.length < itemLimit) {
-          hasMore = false; 
-        }
-
-        loadProducts.addAll(nextProducts);
-      });
-    } catch (e) {
-      setState(() => isLoading = false);
-      print('Error loading items: $e');
-    }
-  }
-
-  // Display items after refresh
-  Future<void> refreshItem() async {
-    searchController.clear();
-    setState(() {
-      loadProducts.clear(); 
-      itemSkip = 0;         
-      hasMore = true;
-      isSearching = false;
-    });
-
-    await loadItems();
-  }
-
-  void sortChanged(String? newSort) {
-    if (newSort == null || newSort == selectedSort) return;
-
-    setState(() {
-      selectedSort = newSort;
-      loadProducts.clear(); 
-      itemSkip = 0;         
-      hasMore = true;
-    });
-
-    loadItems();
-  }
-
-  // Handle search input
-  Future<void> searchInput(String query) async {
-    debouncer.run(() async {
-      final trimmed = query.trim();
-
-      if (trimmed.isEmpty) {
-        setState(() {
-          isSearching = false;
-          loadProducts.clear();
-          itemSkip = 0;
-          hasMore = true;
-        });
-        loadItems();
-        return;
-      }
-
-      setState(() {
-        isSearching = true;
-        isLoading = true;
-        hasMore = false;
-      });
-
-      try {
-        final searchResults = await APIServices().searchProducts(trimmed);
-        setState(() {
-          loadProducts = searchResults;
-          isLoading = false;
-        });
-      } catch (e) {
-        setState(() => isLoading = false);
-        print('Search error: $e');
-      }
-    });
   }
 
   // Navigate screen to product details page
@@ -171,134 +59,213 @@ class _MenuPageState extends State<MenuPage> {
   // User Interface
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color.fromARGB(255, 205, 250, 150),
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 215, 215, 215),
-        title: 
-        Text(
+        backgroundColor: const Color.fromARGB(255, 125, 170, 75),
+        title: Text(
           'Product Catalog',
           style: TextStyle(
+            color: const Color.fromARGB(255, 25, 55, 25),
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
         ),
         centerTitle: true,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Search Field
-          Container(
-            margin: EdgeInsets.only(top: 15, bottom: 5, right: 15, left: 15),
-            child: TextField(
-              controller: searchController,
-              onChanged: searchInput,
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: const Color.fromARGB(255, 220, 220, 220),
-                hintText: 'Search',
-                hintStyle: TextStyle(
-                  color: const Color.fromARGB(255, 155, 155, 155),
-                  fontSize: 15,
-                  // fontWeight: FontWeight.bold,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
-                )
-              ),
-            ),
-          ),
-
-          // Dropdown for Sorting
-          Padding(
-            padding: EdgeInsetsGeometry.only(top: 5, bottom: 5, left: 15, right: 15),
-            child: Container(
-              margin: EdgeInsets.only(top: 5, bottom: 5),
-              padding: EdgeInsets.only(left: 15, right: 15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: Colors.amber,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Sort By:',
-                    style: TextStyle(
+      body: ListenableBuilder(
+        listenable: menuController,
+        builder: (context, _) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search Field
+              Container(
+                margin: EdgeInsets.only(top: 15, bottom: 5, right: 15, left: 15),
+                child: TextField(
+                  controller: searchController,
+                  onChanged: (query) => menuController.searchInput(query),
+                  decoration: InputDecoration(
+                    filled: true,
+                    fillColor: const Color.fromARGB(255, 235, 255, 235),
+                    hintText: 'Search',
+                    hintStyle: TextStyle(
+                      color: const Color.fromARGB(255, 35, 105, 35),
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
                     ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none,
+                    )
                   ),
-              
-                  DropdownButton<String>(
-                    value: selectedSort,
-                    underline: const SizedBox(),
-                    items: [
-                      DropdownMenuItem(value: 'default', child: Text('Default')),
-                      DropdownMenuItem(value: 'title', child: Text('Title')),
-                      DropdownMenuItem(value: 'price', child: Text('Price')),
+                ),
+              ),
+          
+              // Dropdown for Sorting
+              Padding(
+                padding: EdgeInsetsGeometry.only(top: 5, bottom: 5, left: 15, right: 15),
+                child: Container(
+                  margin: EdgeInsets.only(top: 5, bottom: 5),
+                  padding: EdgeInsets.only(left: 15, right: 15),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(15),
+                    color: const Color.fromARGB(255, 235, 255, 235),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Sort By:',
+                        style: TextStyle(
+                          color: const Color.fromARGB(255, 35, 105, 35),
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                  
+                      DropdownButton<String>(
+                        value: menuController.selectedSort,
+                        underline: const SizedBox(),
+                        items: [
+                          DropdownMenuItem(value: 'default', child: Text('Default')),
+                          DropdownMenuItem(value: 'title asc', child: Text('Title ASC')),
+                          DropdownMenuItem(value: 'title desc', child: Text('Title DESC')),
+                          DropdownMenuItem(value: 'price asc', child: Text('Price ASC')),
+                          DropdownMenuItem(value: 'price desc', child: Text('Price DESC')),
+                        ],
+                        onChanged: (newSort) => menuController.sortChanged(newSort),
+                      )
                     ],
-                    onChanged: sortChanged,
-                  )
-                ],
+                  ),
+                ),
               ),
-            ),
-          ),
-
-          // Header Text
-          Padding(
-            padding: EdgeInsets.only(bottom: 5, left: 20),
-            child: Text(
-              "List of Products",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+          
+              // Header Text
+              Padding(
+                padding: EdgeInsets.only(bottom: 5, left: 20),
+                child: Text(
+                  "List of Products",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
-            ),
-          ),
-
-          // Product List + Future Builder
-          Expanded(
-            child: Builder(
-              builder: (context) {
-                if (loadProducts.isEmpty && isLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                if (loadProducts.isEmpty) {
-                  return const Center(child: Text("No Products Found"));
-                }
-
-                return RefreshIndicator(
-                  onRefresh: () async {
-                    await refreshItem();
-                  },
-                  child: ListView.builder(
-                    controller: scrollController,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: loadProducts.length + (hasMore && !isSearching ? 1 : 0),
-                    itemBuilder: (context, index) {
-                      if (index == loadProducts.length) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 16.0),
-                          child: Center(child: CircularProgressIndicator()),
+          
+              // Product List + Future Builder
+              Expanded(
+                child: switch (menuController.state) {
+                  
+                  ViewState.success => RefreshIndicator(
+                    onRefresh: () async {
+                      searchController.clear();
+                      await menuController.refreshItem();
+                    },
+                    child: ListView.builder(
+                      controller: scrollController,
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: menuController.loadProducts.length + 
+                        (menuController.hasMore && !menuController.isSearching ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == menuController.loadProducts.length) {
+                          return const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 16.0),
+                            child: Center(child: CircularProgressIndicator()),
+                          );
+                        }
+                    
+                        final item = menuController.loadProducts[index];
+                    
+                        return ProductList(
+                          products: item,
+                          onTap: () => navigateProductDetails(item),
                         );
                       }
-                  
-                      final item = loadProducts[index];
-                  
-                      return ProductList(
-                        products: item,
-                        onTap: () => navigateProductDetails(item),
-                      );
-                    }
+                    ),
                   ),
-                );
-              },
-            ),
-          ),
-        ],
+                  
+                  ViewState.loading => const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+
+                  ViewState.empty => Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: const [
+                        Icon(Icons.inbox, color: Colors.grey, size: 48),
+                        SizedBox(height: 8),
+                        Text('No Products Found'),
+                      ],
+                    ),
+                  ),
+
+                  ViewState.error => Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.error, color: Colors.red, size: 48),
+                        const SizedBox(height: 8),
+                        Text(
+                          'There is an error'
+                        ),
+                        ElevatedButton(
+                          onPressed: () => menuController.retry(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+
+
+                }
+              )
+              /*
+              Expanded(
+                child: Builder(
+                  builder: (context) {
+                    if (menuController.loadProducts.isEmpty && menuController.isLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (menuController.loadProducts.isEmpty) {
+                      return const Center(child: Text("No Products Found"));
+                    }
+          
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        searchController.clear();
+                        await menuController.refreshItem();
+                      },
+                      child: ListView.builder(
+                        controller: scrollController,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        itemCount: menuController.loadProducts.length + 
+                          (menuController.hasMore && !menuController.isSearching ? 1 : 0),
+                        itemBuilder: (context, index) {
+                          if (index == menuController.loadProducts.length) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 16.0),
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          }
+                      
+                          final item = menuController.loadProducts[index];
+                      
+                          return ProductList(
+                            products: item,
+                            onTap: () => navigateProductDetails(item),
+                          );
+                        }
+                      ),
+                    );
+                  },
+                ),
+              ),
+              */
+            ],
+          );
+        }
       ),
     );
   }

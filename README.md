@@ -4,11 +4,6 @@ An application for Neurogine technical assessment.
 
 ## To-Do Tasks
 
-### User Interface
-- [ ] Implement network states (Loading, Error, Empty, Success)
-- [ ] Addind debouncing in the `Search` function
-- [ ] Improve the UI by changing text fonts, background colours and add extra icons 
-
 ## Completed Tasks
 - [x] Setting up Git configuration
 - [x] Initialize basic screen layout including `Scaffold`, `AppBar` and `Title`
@@ -19,3 +14,6 @@ An application for Neurogine technical assessment.
 - [x] Implement DummyJSON API for pagination and products details 
 - [x] Working on the `Search` function using the API
 - [x] Add pull-to-refresh features on the listview
+- [x] Implement network states (Loading, Error, Empty, Success)
+- [x] Addind debouncing in the `Search` function
+- [x] Improve the UI by changing text fonts, background colours and add extra icons 
