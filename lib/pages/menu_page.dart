@@ -7,6 +7,7 @@ import 'package:product_catalog/components/product_list.dart';
 import 'package:product_catalog/models/product.dart';
 import 'package:product_catalog/pages/product_details_page.dart';
 import 'package:product_catalog/services/api_services.dart';
+import 'package:product_catalog/services/debouncer.dart';
 
 class MenuPage extends StatefulWidget {
   const MenuPage({super.key});
@@ -19,6 +20,7 @@ class _MenuPageState extends State<MenuPage> {
 
   final ScrollController scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
+  final Debouncer debouncer = Debouncer(delay: Duration(milliseconds: 500));
 
   List<Product> loadProducts = [];
 
@@ -42,8 +44,10 @@ class _MenuPageState extends State<MenuPage> {
     });
   }
 
+  // Free up memory when an object is destroyed
   @override
   void dispose() {
+    debouncer.cancel();
     scrollController.dispose();
     searchController.dispose();
     super.dispose();
@@ -119,35 +123,37 @@ class _MenuPageState extends State<MenuPage> {
 
   // Handle search input
   Future<void> searchInput(String query) async {
-    final trimmed = query.trim();
+    debouncer.run(() async {
+      final trimmed = query.trim();
 
-    if (trimmed.isEmpty) {
+      if (trimmed.isEmpty) {
+        setState(() {
+          isSearching = false;
+          loadProducts.clear();
+          itemSkip = 0;
+          hasMore = true;
+        });
+        loadItems();
+        return;
+      }
+
       setState(() {
-        isSearching = false;
-        loadProducts.clear();
-        itemSkip = 0;
-        hasMore = true;
+        isSearching = true;
+        isLoading = true;
+        hasMore = false;
       });
-      loadItems();
-      return;
-    }
 
-    setState(() {
-      isSearching = true;
-      isLoading = true;
-      hasMore = false;
+      try {
+        final searchResults = await APIServices().searchProducts(trimmed);
+        setState(() {
+          loadProducts = searchResults;
+          isLoading = false;
+        });
+      } catch (e) {
+        setState(() => isLoading = false);
+        print('Search error: $e');
+      }
     });
-
-    try {
-      final searchResults = await APIServices().searchProducts(trimmed);
-      setState(() {
-        loadProducts = searchResults;
-        isLoading = false;
-      });
-    } catch (e) {
-      setState(() => isLoading = false);
-      print('Search error: $e');
-    }
   }
 
   // Navigate screen to product details page
