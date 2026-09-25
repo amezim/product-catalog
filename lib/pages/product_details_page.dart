@@ -68,7 +68,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 Text(
                   widget.products.name,
                   style: TextStyle(
-                    color: const Color.fromARGB(255, 25, 55, 25),
+                    color: const Color.fromARGB(255, 45, 95, 45),
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                   ),
@@ -77,7 +77,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 Text(
                   widget.products.brand ?? '[No Brands Available]',
                   style: TextStyle(
-                    color: const Color.fromARGB(255, 25, 55, 25),
+                    color: const Color.fromARGB(255, 45, 95, 45),
                     fontSize: 15,
                   ),
                 ),
@@ -96,7 +96,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                       Text(
                         'RM' + widget.products.price.toString(),
                         style: TextStyle(
-                          color: const Color.fromARGB(255, 25, 55, 25),
+                          color: const Color.fromARGB(255, 45, 95, 45),
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
@@ -111,7 +111,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                           Text(
                             widget.products.rating.toString(),
                             style: TextStyle(
-                              color: const Color.fromARGB(255, 25, 55, 25),
+                              color: const Color.fromARGB(255, 45, 95, 45),
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                             ),
@@ -127,6 +127,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 Text(
                   widget.products.description,
                   style: TextStyle(
+                    color:  Color.fromARGB(255, 45, 95, 45),
                     fontSize: 15,
                   ),
                 ),
@@ -136,7 +137,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                 Text(
                   'Stocks Available: ' + widget.products.stock.toString(),
                   style: TextStyle(
-                    color: const Color.fromARGB(255, 25, 55, 25),
+                    color: const Color.fromARGB(255, 45, 95, 45),
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
                   ),

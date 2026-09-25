@@ -21,6 +21,14 @@ class ProductList extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(10),
           color: const Color.fromARGB(255, 247, 207, 240),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08), 
+              blurRadius: 3, // Smooth glow
+              spreadRadius: 1, // Slight expansion
+              offset: const Offset(0, 3), // Pushes shadow downward
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -87,6 +95,7 @@ class ProductList extends StatelessWidget {
                             'RM' + products.price.toString(),
                             style: TextStyle(
                             color: const Color.fromARGB(255, 60, 15, 60),
+                            fontWeight: FontWeight.bold,
                           ),
                           ),
                         ),

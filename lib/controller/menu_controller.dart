@@ -46,7 +46,6 @@ class ProductMenuController extends ChangeNotifier {
     }
 
     try {
-
       String? sort;
       String? order;
 
@@ -126,6 +125,7 @@ class ProductMenuController extends ChangeNotifier {
   Future<void> searchInput(String query) async {
     debouncer.run(() async {
       final trimmed = query.trim();
+      print('output: "$trimmed"');
 
       if (trimmed.isEmpty) {
         isSearching = false;
@@ -141,11 +141,18 @@ class ProductMenuController extends ChangeNotifier {
       isSearching = true;
       isLoading = true;
       hasMore = false;
+      state = ViewState.loading;
       notifyListeners();
 
       try {
         final searchResults = await apiServices.searchProducts(trimmed);
         loadProducts = searchResults;
+
+        if (loadProducts.isEmpty) { // display state empty if there is no result found
+          state = ViewState.empty;
+        } else {
+          state = ViewState.success;
+        }
       } catch (e) {
         print('Search error: $e');
       } finally {

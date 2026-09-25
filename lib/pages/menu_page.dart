@@ -98,7 +98,14 @@ class _MenuPageState extends State<MenuPage> {
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(20),
                       borderSide: BorderSide.none,
-                    )
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: const BorderSide(
+                        color: Color.fromARGB(135, 35, 105, 35),
+                        width: 2,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -111,7 +118,7 @@ class _MenuPageState extends State<MenuPage> {
                   padding: EdgeInsets.only(left: 15, right: 15),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(15),
-                    color: const Color.fromARGB(255, 235, 255, 235),
+                    color: const Color.fromARGB(255, 255, 255, 235),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -119,7 +126,7 @@ class _MenuPageState extends State<MenuPage> {
                       Text(
                         'Sort By:',
                         style: TextStyle(
-                          color: const Color.fromARGB(255, 35, 105, 35),
+                          color: const Color.fromARGB(255, 105, 105, 35),
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),
@@ -128,6 +135,12 @@ class _MenuPageState extends State<MenuPage> {
                       DropdownButton<String>(
                         value: menuController.selectedSort,
                         underline: const SizedBox(),
+                        dropdownColor: const Color.fromARGB(255, 245, 245, 200),
+                        style: TextStyle(
+                          color: const Color.fromARGB(255, 105, 105, 35),
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
                         items: [
                           DropdownMenuItem(value: 'default', child: Text('Default')),
                           DropdownMenuItem(value: 'title asc', child: Text('Title ASC')),
@@ -148,13 +161,14 @@ class _MenuPageState extends State<MenuPage> {
                 child: Text(
                   "List of Products",
                   style: TextStyle(
+                    color: const Color.fromARGB(255, 22, 84, 22),
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
           
-              // Product List + Future Builder
+              // Product List
               Expanded(
                 child: switch (menuController.state) {
                   
@@ -194,9 +208,17 @@ class _MenuPageState extends State<MenuPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
-                        Icon(Icons.inbox, color: Colors.grey, size: 48),
+                        Icon(Icons.inbox, 
+                          color: const Color.fromARGB(255, 35, 105, 35),
+                          size: 48
+                        ),
                         SizedBox(height: 8),
-                        Text('No Products Found'),
+                        Text(
+                          'No Products Found',
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 35, 105, 35),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -208,8 +230,12 @@ class _MenuPageState extends State<MenuPage> {
                         const Icon(Icons.error, color: Colors.red, size: 48),
                         const SizedBox(height: 8),
                         Text(
-                          'There is an error'
+                          'There is an error',
+                          style: TextStyle(
+                            color: const Color.fromARGB(255, 35, 105, 35),
+                          ),
                         ),
+                        SizedBox(height: 15),
                         ElevatedButton(
                           onPressed: () => menuController.retry(),
                           child: const Text('Retry'),
@@ -217,52 +243,8 @@ class _MenuPageState extends State<MenuPage> {
                       ],
                     ),
                   ),
-
-
                 }
               )
-              /*
-              Expanded(
-                child: Builder(
-                  builder: (context) {
-                    if (menuController.loadProducts.isEmpty && menuController.isLoading) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (menuController.loadProducts.isEmpty) {
-                      return const Center(child: Text("No Products Found"));
-                    }
-          
-                    return RefreshIndicator(
-                      onRefresh: () async {
-                        searchController.clear();
-                        await menuController.refreshItem();
-                      },
-                      child: ListView.builder(
-                        controller: scrollController,
-                        physics: const AlwaysScrollableScrollPhysics(),
-                        itemCount: menuController.loadProducts.length + 
-                          (menuController.hasMore && !menuController.isSearching ? 1 : 0),
-                        itemBuilder: (context, index) {
-                          if (index == menuController.loadProducts.length) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 16.0),
-                              child: Center(child: CircularProgressIndicator()),
-                            );
-                          }
-                      
-                          final item = menuController.loadProducts[index];
-                      
-                          return ProductList(
-                            products: item,
-                            onTap: () => navigateProductDetails(item),
-                          );
-                        }
-                      ),
-                    );
-                  },
-                ),
-              ),
-              */
             ],
           );
         }
